@@ -11,7 +11,7 @@ public class Conveyor
     private Present[] presents; // The requirements say this must be a fixed size array
     public  HashSet<Integer> destinations = new HashSet();
     private int top;
-    public Object lock = new Object();
+    private final Object lock = new Object();
     // TODO - add more members?
     
     public Conveyor(int id, int size)
@@ -50,6 +50,8 @@ public class Conveyor
     public void threadWait() throws InterruptedException {
         synchronized (lock) { lock.wait(); }
     }
+
+    public int getRemainingPresents() { return top; }
 
     // TODO - add more functions
 }

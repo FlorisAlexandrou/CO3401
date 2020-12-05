@@ -47,7 +47,7 @@ public class AssignmentPart1
         
         // READ FILE
         // =========
-        String filename = "scenario1.txt";
+        String filename = "scenario2.txt";
         Scanner inputStream = null;
         try
         {
@@ -402,6 +402,16 @@ public class AssignmentPart1
         int giftsOnMachine = 0;
         int giftsInSacks = 0;
         // TODO - calculate these numbers!
+        for (int t = 0; t < numTurntables; t++)
+        {
+            if (tables[t].isPresentOnTable) giftsOnMachine += 1;
+        }
+
+        for (int b =0; b< numBelts; b++)
+        {
+            giftsOnMachine += belts[b].getRemainingPresents();
+        }
+
         
         System.out.print("\nOut of " + giftsDeposited + " gifts deposited, ");
         System.out.print(giftsOnMachine + " are still on the machine, and ");
