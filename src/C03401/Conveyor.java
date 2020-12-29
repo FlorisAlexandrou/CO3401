@@ -31,10 +31,12 @@ public class Conveyor
     public void loadPresent(Present p) {
         presents[top] = p;
         top++;
+//        System.out.println(id + "Produced+, size is: " + top);
     }
 
     // Unload presents from belt to turntable
     public Present unloadPresent() {
+//        System.out.println(id + "Consumed-, size is: " + top);
         top--;
         return presents[top];
     }

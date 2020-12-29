@@ -21,6 +21,7 @@ public class Turntable extends Thread {
     public boolean isPresentOnTable = false;
     // this individual table's lookup: SackID -> output port
     HashMap<Integer, Integer> outputMap = new HashMap<>();
+    private volatile boolean isRunning;
 
     public Turntable(String ID) {
         id = ID;
@@ -49,13 +50,18 @@ public class Turntable extends Thread {
         // TODO
         // Count the present that is trapped on the table after the system stops (between 1.5 second sleeps)
         try {
+            isRunning = true;
             consume();
         }
-        catch (InterruptedException e) {}
+        catch (InterruptedException e) {
+            System.out.println("Table " + id + " interrupted!");
+            // TODO
+            // Continue sorting presents until conveyors are empty
+        }
     }
 
     private synchronized void consume() throws InterruptedException {
-        while (true)
+        while (isRunning)
         {
             // Poll all input belts
             // If they are all empty, then wait for the producer
@@ -67,11 +73,11 @@ public class Turntable extends Thread {
                 {
                     Present p = inputBelts[i].unloadPresent();
                     isPresentOnTable = true;
+
                     // Map present destination with table port
                     int sackID = destinations.get(p.readDestination());
                     int outputPort = outputMap.get(sackID);
 
-                    int dest = Math.abs(i - outputPort);
                     // If input is north/south and output is east/west or vice versa then simulate table rotation
                     if (Math.abs(i - outputPort) != 2) sleep(500);
 
@@ -81,37 +87,35 @@ public class Turntable extends Thread {
                     // If output port is a sack
                     if (connections[outputPort].connType == ConnectionType.OutputSack)
                     {
-                        if (!connections[outputPort].sack.isFull())
-                        {
-                            // Simulate present placement in sack
-                            sleep(750);
-                            connections[outputPort].sack.addPresent(p);
-                        }
+                        while (connections[outputPort].sack.isFull())
+                            inputBelts[i].threadWait();
+
+                        // Simulate present placement in sack
+                        sleep(750);
+                        connections[outputPort].sack.addPresent(p);
                     }
 
                     // If output port is a belt
                     else if (connections[outputPort].connType == ConnectionType.OutputBelt)
                     {
-                        if (!connections[outputPort].belt.isFull())
-                        {
-                            // Simulate present placement on the output belt
-                            sleep(750);
-                            connections[outputPort].belt.loadPresent(p);
+                        while (connections[outputPort].belt.isFull()) {
+                            inputBelts[i].threadWait();
                         }
+
+                        // Simulate present placement on belt
+                        sleep(750);
+                        connections[outputPort].belt.loadPresent(p);
+
                     }
                     isPresentOnTable = false;
                     inputBelts[i].notifyAllThreads();
                 }
             }
-            // After each loop, the belts are empty so we wait for the producers (Hopper)
-            // Testing, does not work
-//            for (int i = 0; i < inputBelts.length; i++)
-//            {
-//                if (!(inputBelts[i] == null || inputBelts[i].isEmpty()))
-//                {
-//                    inputBelts[i].threadWait();
-//                }
-//            }
+            // After each poll, the belts are empty so we wait for the producers (Hopper)
         }
+        System.out.println("Table " + id + " stopped!");
     }
+
+    public void indicateToStop() { isRunning = false; }
+
 }

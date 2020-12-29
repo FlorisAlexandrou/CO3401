@@ -24,8 +24,7 @@ public class AssignmentPart1
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws InterruptedException {
         // These variables will store the configuration
         // of the Present sorting machine
         
@@ -47,7 +46,7 @@ public class AssignmentPart1
         
         // READ FILE
         // =========
-        String filename = "scenario2.txt";
+        String filename = "scenario5.txt";
         Scanner inputStream = null;
         try
         {
@@ -369,13 +368,39 @@ public class AssignmentPart1
             
             System.out.println(giftsInHoppers + " presents remaining in hoppers;\n" + giftsInSacks + " presents sorted into sacks.\n");
 
+            int giftsOnBelts = 0;
+            int giftsOnTables = 0;
+            // Added below
+            for (Conveyor conveyor: belts) {
+                giftsOnBelts += conveyor.getRemainingPresents();
+            }
+            System.out.println(giftsOnBelts + " presents are on belts");
+
+            for (Turntable table : tables) {
+                giftsOnTables += table.isPresentOnTable ? 1 : 0;
+            }
+
+            System.out.println(giftsOnTables + " presents are on tables");
+
         }
         long endTime = System.currentTimeMillis();
         System.out.println("*** Input Stopped after " + (endTime - startTime) / 1000 + "s. ***");
 
         // TODO
         // Stop the hoppers!
+        for (int h = 0; h < numHoppers; h++)
+        {
+            hoppers[h].indicateToStop();
+            hoppers[h].interrupt();
+        }
+
         // Stop the tables!
+        for (int t = 0; t < numTurntables; t++)
+        {
+            tables[t].indicateToStop();
+            tables[t].interrupt();
+        }
+
         // HINT - Wait for everything to finish...
 
         endTime = System.currentTimeMillis();
@@ -395,7 +420,8 @@ public class AssignmentPart1
         
         for (int h = 0; h < numHoppers; h++)
         {
-            System.out.println("Hopper " + hoppers[h].id + " deposited " + /* TODO */ " presents and waited " + /* TODO */ "s.");
+            System.out.println("Hopper " + hoppers[h].id + " deposited " + hoppers[h].getDepositedPresents() + /* TODO */ " presents and waited " + hoppers[h].getWaitingTime() + /* TODO */ "s.");
+            giftsDeposited += hoppers[h].getDepositedPresents();
         }
         System.out.println();
 
@@ -412,13 +438,16 @@ public class AssignmentPart1
             giftsOnMachine += belts[b].getRemainingPresents();
         }
 
-        
+        for (Sack sack: sacks)
+        {
+            giftsInSacks += sack.getNumberOfPresents();
+        }
+
         System.out.print("\nOut of " + giftsDeposited + " gifts deposited, ");
         System.out.print(giftsOnMachine + " are still on the machine, and ");
         System.out.println(giftsInSacks + " made it into the sacks");
 
         int missing = giftsDeposited - giftsInSacks - giftsOnMachine;
         System.out.println(missing + " gifts went missing.");
-
     }
 }

@@ -12,6 +12,9 @@ public class Hopper extends Thread
 
     Present[] collection;
     private int top = 0;
+    private int deposited = 0;
+    private long waitingTime = 0;
+    private volatile boolean isRunning;
 
     public Hopper(int id, Conveyor con, int capacity, int speed)
     {
@@ -25,28 +28,59 @@ public class Hopper extends Thread
     {
         collection[top] = p;
         top++;
+        deposited++;
     }
 
     public void run()
     {
-        produce();
-    }
+        try {
+            isRunning = true;
+            produce();
+        } catch (InterruptedException e) {
+            System.out.println("Hopper " + id + " interrupted!");
 
-    private synchronized void produce() {
-        while (top > 0)
-        {
-            while (belt.isFull()) {
-                try {
-                    belt.threadWait();
-                } catch (InterruptedException e) { }
-            }
-            top--;
-            belt.loadPresent(collection[top]);
-            belt.notifyAllThreads();
         }
     }
 
-    public int getRemainingPresents() { return this.top; }
+    private synchronized void produce() throws InterruptedException {
+        while (isRunning) {
+            if (top > 0 )
+            {
+                // When belt is full, wait for consumer (table)
+                if (belt.isFull()) {
+                    long startTime = System.nanoTime();
+                    belt.threadWait();
+                    long endTime = System.nanoTime();
+                    // Calculate hopper waiting time
+                    waitingTime += endTime - startTime;
+                }
+                else {
+                    top--;
+                    belt.loadPresent(collection[top]);
+                    belt.notifyAllThreads();
+                    // Simulate present placement
+                    sleep(1000 / speed);
+                }
+            }
+            else {
+                // Notify consumers/tables
+                long startTime = System.nanoTime();
+                belt.notifyAllThreads();
+                long endTime = System.nanoTime();
+                // Calculate hopper waiting time
+                waitingTime += endTime - startTime;
+            }
+        }
+        System.out.println("Hopper " + id + " stopped!");
+    }
+
+    public int getRemainingPresents() { return top; }
+
+    public int getDepositedPresents() { return deposited - top; }
+
+    public double getWaitingTime() { return (double)waitingTime / 1_000_000_000.0; }
+
+    public void indicateToStop() { isRunning = false; }
 
     // TODO Add more methods?
 }
