@@ -36,10 +36,7 @@ public class Hopper extends Thread
         try {
             isRunning = true;
             produce();
-        } catch (InterruptedException e) {
-            System.out.println("Hopper " + id + " interrupted!");
-
-        }
+        } catch (InterruptedException e) { }
     }
 
     private synchronized void produce() throws InterruptedException {
@@ -71,7 +68,6 @@ public class Hopper extends Thread
                 waitingTime += endTime - startTime;
             }
         }
-        System.out.println("Hopper " + id + " stopped!");
     }
 
     public int getRemainingPresents() { return top; }
@@ -81,6 +77,4 @@ public class Hopper extends Thread
     public double getWaitingTime() { return (double)waitingTime / 1_000_000_000.0; }
 
     public void indicateToStop() { isRunning = false; }
-
-    // TODO Add more methods?
 }

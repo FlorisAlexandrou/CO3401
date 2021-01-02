@@ -24,7 +24,4 @@ public class Sack
     }
 
     public int getNumberOfPresents() { return top;}
-
-    //TODO - Add more methods
-    
 }

@@ -353,14 +353,14 @@ public class AssignmentPart1
             System.out.println("\nInterim Report @ " + time + "s:");
 
             int giftsInSacks = 0;
-            // TODO - calculate number
+
             for (Sack sack: sacks)
             {
                 giftsInSacks += sack.getNumberOfPresents();
             }
 
             int giftsInHoppers = 0;
-            // TODO - calculate number
+
             for (Hopper hopper: hoppers)
             {
                 giftsInHoppers += hopper.getRemainingPresents();
@@ -386,7 +386,6 @@ public class AssignmentPart1
         long endTime = System.currentTimeMillis();
         System.out.println("*** Input Stopped after " + (endTime - startTime) / 1000 + "s. ***");
 
-        // TODO
         // Stop the hoppers!
         for (int h = 0; h < numHoppers; h++)
         {
@@ -399,6 +398,20 @@ public class AssignmentPart1
         {
             tables[t].indicateToStop();
             tables[t].interrupt();
+        }
+
+        // Wait for hoppers to finish
+        for (int h = 0; h < numHoppers; h++)
+        {
+            while (hoppers[h].isAlive())
+            {}
+        }
+
+        // Wait for tables to finish
+        for (int t = 0; t < numTurntables; t++)
+        {
+            while (tables[t].isAlive())
+            {}
         }
 
         // HINT - Wait for everything to finish...
@@ -416,18 +429,17 @@ public class AssignmentPart1
         System.out.println("Total Run Time" + (endTime - startTime) / 1000 + "s.");
         
         int giftsDeposited = 0;
-        // TODO - calculate this number!
-        
+
         for (int h = 0; h < numHoppers; h++)
         {
-            System.out.println("Hopper " + hoppers[h].id + " deposited " + hoppers[h].getDepositedPresents() + /* TODO */ " presents and waited " + hoppers[h].getWaitingTime() + /* TODO */ "s.");
+            System.out.println("Hopper " + hoppers[h].id + " deposited " + hoppers[h].getDepositedPresents() + " presents and waited " + hoppers[h].getWaitingTime() + "s.");
             giftsDeposited += hoppers[h].getDepositedPresents();
         }
         System.out.println();
 
         int giftsOnMachine = 0;
         int giftsInSacks = 0;
-        // TODO - calculate these numbers!
+
         for (int t = 0; t < numTurntables; t++)
         {
             if (tables[t].isPresentOnTable) giftsOnMachine += 1;

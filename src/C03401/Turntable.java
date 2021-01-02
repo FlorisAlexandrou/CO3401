@@ -18,6 +18,7 @@ public class Turntable extends Thread {
     private Conveyor[] inputBelts = new Conveyor[4];
     // global lookup: age-range -> SackID
     static HashMap<String, Integer> destinations = new HashMap<>();
+    // Counts the present that stays on the table after the system stops (between 1.5 second sleeps)
     public boolean isPresentOnTable = false;
     // this individual table's lookup: SackID -> output port
     HashMap<Integer, Integer> outputMap = new HashMap<>();
@@ -47,17 +48,11 @@ public class Turntable extends Thread {
     }
 
     public void run() {
-        // TODO
-        // Count the present that is trapped on the table after the system stops (between 1.5 second sleeps)
         try {
             isRunning = true;
             consume();
         }
-        catch (InterruptedException e) {
-            System.out.println("Table " + id + " interrupted!");
-            // TODO
-            // Continue sorting presents until conveyors are empty
-        }
+        catch (InterruptedException e) { }
     }
 
     private synchronized void consume() throws InterruptedException {
@@ -113,9 +108,7 @@ public class Turntable extends Thread {
             }
             // After each poll, the belts are empty so we wait for the producers (Hopper)
         }
-        System.out.println("Table " + id + " stopped!");
     }
 
     public void indicateToStop() { isRunning = false; }
-
 }

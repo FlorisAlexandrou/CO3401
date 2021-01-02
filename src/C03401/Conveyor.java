@@ -11,15 +11,13 @@ public class Conveyor
     private Present[] presents; // The requirements say this must be a fixed size array
     public  HashSet<Integer> destinations = new HashSet();
     private int top;
+    // Object that is used to communicate wait and notify between table and hopper
     private final Object lock = new Object();
-    // TODO - add more members?
-    
+
     public Conveyor(int id, int size)
     {
         this.id = id;
         presents = new Present[size];
-        
-        //TODO - more construction likely!
     }
 
     public void addDestination(int hopperID)
@@ -31,12 +29,10 @@ public class Conveyor
     public void loadPresent(Present p) {
         presents[top] = p;
         top++;
-//        System.out.println(id + "Produced+, size is: " + top);
     }
 
     // Unload presents from belt to turntable
     public Present unloadPresent() {
-//        System.out.println(id + "Consumed-, size is: " + top);
         top--;
         return presents[top];
     }
@@ -55,5 +51,4 @@ public class Conveyor
 
     public int getRemainingPresents() { return top; }
 
-    // TODO - add more functions
 }
