@@ -10,7 +10,7 @@ public class Conveyor
     int id;
     private Present[] presents; // The requirements say this must be a fixed size array
     public  HashSet<Integer> destinations = new HashSet();
-    private int top;
+    private volatile int top;
     // Object that is used to communicate wait and notify between table and hopper
     private final Object lock = new Object();
 
@@ -47,6 +47,10 @@ public class Conveyor
 
     public void threadWait() throws InterruptedException {
         synchronized (lock) { lock.wait(); }
+    }
+
+    public void threadWait(long time) throws InterruptedException {
+        synchronized (lock) { lock.wait(time); }
     }
 
     public int getRemainingPresents() { return top; }

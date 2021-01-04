@@ -367,22 +367,8 @@ public class AssignmentPart1
             }
             
             System.out.println(giftsInHoppers + " presents remaining in hoppers;\n" + giftsInSacks + " presents sorted into sacks.\n");
-
-            int giftsOnBelts = 0;
-            int giftsOnTables = 0;
-            // Added below
-            for (Conveyor conveyor: belts) {
-                giftsOnBelts += conveyor.getRemainingPresents();
-            }
-            System.out.println(giftsOnBelts + " presents are on belts");
-
-            for (Turntable table : tables) {
-                giftsOnTables += table.isPresentOnTable ? 1 : 0;
-            }
-
-            System.out.println(giftsOnTables + " presents are on tables");
-
         }
+
         long endTime = System.currentTimeMillis();
         System.out.println("*** Input Stopped after " + (endTime - startTime) / 1000 + "s. ***");
 
@@ -392,6 +378,25 @@ public class AssignmentPart1
             hoppers[h].indicateToStop();
             hoppers[h].interrupt();
         }
+
+        // Wait for machine to sort the remaining presents
+        boolean areGiftsOnMachine;
+        do {
+            areGiftsOnMachine = false;
+            for (int b = 0; b < numBelts; b++) {
+                if (belts[b].getRemainingPresents() > 0) {
+                    belts[b].notifyAllThreads();
+                    areGiftsOnMachine = true;
+                }
+            }
+
+            for (int t = 0; t < numTurntables; t++) {
+                if (tables[t].isPresentOnTable) {
+                    areGiftsOnMachine = true;
+                    break;
+                }
+            }
+        } while (areGiftsOnMachine);
 
         // Stop the tables!
         for (int t = 0; t < numTurntables; t++)
@@ -414,8 +419,6 @@ public class AssignmentPart1
             {}
         }
 
-        // HINT - Wait for everything to finish...
-
         endTime = System.currentTimeMillis();
         System.out.println("*** Machine completed shutdown after " + (endTime - startTime) / 1000 + "s. ***");
 
@@ -426,7 +429,7 @@ public class AssignmentPart1
         System.out.println();
         System.out.println("\nFINAL REPORT\n");
         System.out.println("Configuration: " + filename);
-        System.out.println("Total Run Time" + (endTime - startTime) / 1000 + "s.");
+        System.out.println("Total Run Time " + (endTime - startTime) / 1000 + "s.");
         
         int giftsDeposited = 0;
 

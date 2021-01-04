@@ -39,7 +39,7 @@ public class Hopper extends Thread
         } catch (InterruptedException e) { }
     }
 
-    private synchronized void produce() throws InterruptedException {
+    private void produce() throws InterruptedException {
         while (isRunning) {
             if (top > 0 )
             {
@@ -56,6 +56,7 @@ public class Hopper extends Thread
                     belt.loadPresent(collection[top]);
                     belt.notifyAllThreads();
                     // Simulate present placement
+                    // The speed represents the number of presents placed per second
                     sleep(1000 / speed);
                 }
             }

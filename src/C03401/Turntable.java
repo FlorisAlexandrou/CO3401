@@ -55,7 +55,7 @@ public class Turntable extends Thread {
         catch (InterruptedException e) { }
     }
 
-    private synchronized void consume() throws InterruptedException {
+    private void consume() throws InterruptedException {
         while (isRunning)
         {
             // Poll all input belts
@@ -82,8 +82,13 @@ public class Turntable extends Thread {
                     // If output port is a sack
                     if (connections[outputPort].connType == ConnectionType.OutputSack)
                     {
-                        while (connections[outputPort].sack.isFull())
-                            inputBelts[i].threadWait();
+
+                        // Wait for elf to change the sack (5 seconds)
+                        if (connections[outputPort].sack.isFull())
+                        {
+                            var changeTime = connections[outputPort].sack.changeSack();
+                            inputBelts[i].threadWait(changeTime);
+                        }
 
                         // Simulate present placement in sack
                         sleep(750);
@@ -105,7 +110,9 @@ public class Turntable extends Thread {
                     isPresentOnTable = false;
                     inputBelts[i].notifyAllThreads();
                 }
+                else if (inputBelts[i] != null && inputBelts[i].isEmpty()) inputBelts[i].notifyAllThreads();
             }
+
             // After each poll, the belts are empty so we wait for the producers (Hopper)
         }
     }
